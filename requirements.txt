@@ -1,0 +1,34 @@
+# GlacierEQ Memory Master - Python Dependencies
+
+# Web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# Database connectors
+neo4j>=5.15.0
+chromadb>=0.4.0
+
+# HTTP client
+requests>=2.31.0
+
+# Configuration
+pyyaml>=6.0.1
+python-dotenv>=1.0.0
+
+# Memory providers (when available)
+# mem0ai>=0.1.0
+# supermemory>=0.1.0
+
+# Development
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+flake8>=6.0.0
+
+# Legal/forensic
+cryptography>=41.0.0
+hashlib-compat>=0.1.0
+
+# MCP Protocol
+# mcp>=0.1.0  # Add when available
