@@ -1,0 +1,63 @@
+# Memory Policies Configuration
+# TTL, tombstone, and redaction policies
+
+ttl_policy:
+  # Time-to-live by classification (days)
+  privileged: null  # Attorney-client privilege - no expiration
+  evidence: null    # Legal evidence - no expiration
+  general: 365      # General memories - 1 year
+  temporary: 7      # Temporary notes - 1 week
+  sensitive: 90     # Sensitive data - 3 months
+
+tombstone_policy:
+  enabled: true
+  require_reason: true
+  audit_trail: true
+  redact_derived: true  # Redact memories derived from deleted ones
+
+redaction_policy:
+  enabled: true
+  patterns:
+    - pattern: "\\b\\d{3}-\\d{2}-\\d{4}\\b"  # SSN
+      replacement: "[SSN-REDACTED]"
+    - pattern: "\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b"  # Email
+      replacement: "[EMAIL-REDACTED]"
+    - pattern: "\\b\\d{4}[- ]?\\d{4}[- ]?\\d{4}[- ]?\\d{4}\\b"  # Credit card
+      replacement: "[CC-REDACTED]"
+  llm_summary: true  # Use LLM to create redacted summaries
+
+access_control:
+  privileged_roles:
+    - attorney
+    - legal_counsel
+    - case_manager
+  evidence_roles:
+    - attorney
+    - paralegal
+    - investigator
+  general_access: true
+
+forensic_logging:
+  enabled: true
+  log_level: INFO
+  audit_all_operations: true
+  chain_of_custody_required: 
+    - evidence
+    - privileged
+  retention_years: 7
+
+integration:
+  mem0:
+    provider: neo4j
+    enable_graph: true
+    sync_interval: 300  # 5 minutes
+  
+  supermemory:
+    acceleration_only: true
+    mirror_writes: true
+    fallback_timeout: 5000  # 5 seconds
+  
+  neo4j:
+    system_of_record: true
+    backup_schedule: "0 2 * * *"  # Daily at 2 AM
+    constraint_validation: true

@@ -1,0 +1,148 @@
+{
+  "workspace": "GlacierEQ Memory Ops",
+  "tabs": [
+    {
+      "id": "memory",
+      "name": "Memory",
+      "icon": "🧠",
+      "type": "api_form",
+      "endpoints": {
+        "write": {
+          "url": "http://localhost:8080/memory/write",
+          "method": "POST",
+          "fields": [
+            {"name": "content", "type": "textarea", "required": true},
+            {"name": "entity", "type": "text", "required": true},
+            {"name": "classification", "type": "select", "options": ["general", "privileged", "evidence", "sensitive"]}
+          ]
+        },
+        "search": {
+          "url": "http://localhost:8080/memory/search", 
+          "method": "GET",
+          "fields": [
+            {"name": "query", "type": "text", "required": true},
+            {"name": "entity", "type": "text"},
+            {"name": "limit", "type": "number", "default": 10}
+          ]
+        },
+        "forget": {
+          "url": "http://localhost:8080/memory/forget",
+          "method": "DELETE",
+          "fields": [
+            {"name": "memory_id", "type": "text", "required": true},
+            {"name": "reason", "type": "text", "required": true}
+          ]
+        }
+      }
+    },
+    {
+      "id": "graphs",
+      "name": "Graphs", 
+      "icon": "🔗",
+      "type": "embed_panels",
+      "panels": [
+        {
+          "name": "Neo4j Browser",
+          "type": "iframe",
+          "url": "http://localhost:7474/browser/",
+          "auth": "neo4j:password"
+        },
+        {
+          "name": "Cypher Editor",
+          "type": "api_form",
+          "endpoint": {
+            "url": "http://localhost:8080/graph/cypher",
+            "method": "POST",
+            "fields": [
+              {"name": "query", "type": "textarea", "placeholder": "MATCH (m:Memory) RETURN m LIMIT 10"}
+            ]
+          }
+        },
+        {
+          "name": "InfraNodus",
+          "type": "iframe", 
+          "url": "https://infranodus.com/api/embed",
+          "auth_header": "X-API-Key: ${INFRANODUS_API_KEY}"
+        },
+        {
+          "name": "Provenance",
+          "type": "api_form",
+          "endpoint": {
+            "url": "http://localhost:8080/graph/traverse",
+            "method": "POST",
+            "fields": [
+              {"name": "start_entity", "type": "text", "required": true},
+              {"name": "relationship", "type": "select", "options": ["RELATES_TO", "CUSTODY_EVENT", "DERIVED_FROM"]},
+              {"name": "depth", "type": "number", "default": 3}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "intelligence",
+      "name": "Intelligence",
+      "icon": "🎯", 
+      "type": "dashboard",
+      "widgets": [
+        {
+          "name": "RAG Pipeline",
+          "type": "status_grid",
+          "endpoints": [
+            "http://localhost:8080/rag/semantic",
+            "http://localhost:8080/rag/graph"
+          ]
+        },
+        {
+          "name": "MCP Tools",
+          "type": "tool_runner",
+          "tools": [
+            "memory_search",
+            "traverse_graph", 
+            "generate_summary",
+            "analyze_patterns"
+          ]
+        },
+        {
+          "name": "Constellation Status",
+          "type": "service_monitor",
+          "services": [
+            "memory-orchestrator",
+            "neo4j",
+            "chromadb",
+            "mem0-api",
+            "supermemory-api"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ops",
+      "name": "Ops",
+      "icon": "⚙️",
+      "type": "operations",
+      "actions": [
+        {
+          "name": "Run Installer",
+          "command": "bash install.sh",
+          "type": "shell"
+        },
+        {
+          "name": "Health Check",
+          "endpoint": "http://localhost:8080/health",
+          "type": "api_call"
+        },
+        {
+          "name": "Environment Status",
+          "endpoint": "http://localhost:8080/env/status",
+          "type": "api_call"
+        },
+        {
+          "name": "Migration Status", 
+          "endpoint": "http://localhost:8080/migration/status",
+          "type": "api_call"
+        }
+      ]
+    }
+  ]
+}
