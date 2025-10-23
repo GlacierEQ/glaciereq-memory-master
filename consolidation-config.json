@@ -1,0 +1,10 @@
+{
+  "master_repo": "glaciereq-memory-master",
+  "github_org": "GlacierEQ",
+  "source_repos": {
+    "core/memory-orchestrator": "quantum-memory-orchestrator",
+    "core/master-grid": "MCP-MASTER-OMNI-GRID",
+    "core/constellation": "casey-custom-mcp-constellation",
+    "core/quantum-matrix": "GODMIND-quantum-intelligence-matrix"
+  }
+}
