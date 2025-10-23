@@ -1,0 +1,108 @@
+name: GlacierEQ Memory Master CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    
+    services:
+      neo4j:
+        image: neo4j:5
+        env:
+          NEO4J_AUTH: neo4j/testpass
+        ports:
+          - 7687:7687
+        options: --health-cmd "cypher-shell -u neo4j -p testpass 'RETURN 1'" --health-interval 10s --health-timeout 5s --health-retries 5
+      
+      chromadb:
+        image: chromadb/chroma:latest
+        ports:
+          - 8000:8000
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install black flake8 yamllint pytest pytest-asyncio
+    
+    - name: Lint code formatting
+      run: |
+        black --check .
+        flake8 . --max-line-length=120 --ignore=E203,W503
+    
+    - name: Lint YAML files
+      run: |
+        yamllint policies/ -d relaxed
+        yamllint docker-compose.yml -d relaxed
+    
+    - name: Validate configuration files
+      run: |
+        python -c "import json; json.load(open('mcp-servers.json'))"
+        python -c "import json; json.load(open('consolidation-config.json'))"
+        python -c "import json; json.load(open('ui/sigma/config.json'))"
+    
+    - name: Initialize Neo4j constraints
+      env:
+        NEO4J_URI: bolt://localhost:7687
+        NEO4J_USER: neo4j
+        NEO4J_PASSWORD: testpass
+      run: |
+        pip install neo4j
+        python -c "
+        from neo4j import GraphDatabase
+        driver = GraphDatabase.driver('bolt://localhost:7687', auth=('neo4j', 'testpass'))
+        with driver.session() as session:
+            session.run('CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE')
+            session.run('CREATE CONSTRAINT memory_id IF NOT EXISTS FOR (m:Memory) REQUIRE m.id IS UNIQUE')
+        driver.close()
+        print('✅ Neo4j constraints created')
+        "
+    
+    - name: Run smoke tests
+      env:
+        NEO4J_URI: bolt://localhost:7687
+        NEO4J_USER: neo4j
+        NEO4J_PASSWORD: testpass
+        MEM0_API_KEY: test_key
+        SUPERMEMORY_API_KEY: test_key
+        CASE_NUMBER: 1FDV-23-0001009
+      run: |
+        # Test basic imports
+        python -c "from graph.neo4j_client import Neo4jClient; print('✅ Neo4j client import')"
+        python -c "from providers.mem0 import Mem0Provider; print('✅ Mem0 provider import')"
+        python -c "from providers.supermemory import SuperMemoryProvider; print('✅ SuperMemory provider import')"
+        python -c "from core.memory_orchestrator.policy_engine import PolicyEngine; print('✅ Policy engine import')"
+        
+        # Test Neo4j connectivity
+        python -c "
+        import asyncio
+        from graph.neo4j_client import Neo4jClient
+        async def test():
+            client = Neo4jClient()
+            result = await client.cypher('RETURN 1 as test')
+            assert result['records'][0]['test'] == 1
+            print('✅ Neo4j connectivity test passed')
+        asyncio.run(test())
+        "
+        
+        # Test policy engine
+        python -c "
+        from core.memory_orchestrator.policy_engine import PolicyEngine
+        engine = PolicyEngine()
+        test_memory = {'classification': 'general', 'timestamp': '2025-01-01T00:00:00Z'}
+        expired = engine.check_ttl_expired(test_memory)
+        print(f'✅ Policy engine test: TTL check = {expired}')
+        "
