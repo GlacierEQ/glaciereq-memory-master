@@ -35,7 +35,7 @@ jobs:
         
     - name: 🐍 Setup Python (if needed)
       if: hashFiles('**/*.py', '**/requirements.txt', '**/pyproject.toml') != ''
-      uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236  # v4.7.1
+      uses: actions/setup-python@7f4fc3e22c37d6ff65e88745f38bd3157c663f7c  # v4.9.1
       with:
         python-version: '3.11'
         cache: 'pip'
