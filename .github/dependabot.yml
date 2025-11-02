@@ -1,0 +1,55 @@
+# 🧠 Memory Master Automated Security & Dependency Updates
+# GlacierEQ Memory Master - Maximum Security Configuration
+
+version: 2
+updates:
+  # Python dependencies - Weekly security updates
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "⬆️ security"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
+      - "memory-master"
+    reviewers:
+      - "GlacierEQ"
+    
+  # Node.js dependencies - Weekly security updates
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "06:00"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "⬆️ security"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
+      - "memory-master"
+    reviewers:
+      - "GlacierEQ"
+      
+  # GitHub Actions - Monthly security updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "wednesday"
+    commit-message:
+      prefix: "⬆️ actions"
+    labels:
+      - "github-actions"
+      - "security"
+      - "memory-master"
+    reviewers:
+      - "GlacierEQ"
