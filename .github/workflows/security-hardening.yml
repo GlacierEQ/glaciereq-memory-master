@@ -128,7 +128,7 @@ jobs:
         cat security-report.txt
         
     - name: 📎 Upload Security Artifacts
-      uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32  # v3.1.3
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5.0.0
       if: always()
       with:
         name: memory-master-security-scan-${{ github.run_number }}
